@@ -167,25 +167,25 @@ function openPortfolioModal(folder, index, title, description) {
     let categoryName = '';
     switch (folder) {
         case 's1':
-            categoryName = 'تصميم الهويات البصرية';
+            categoryName = 'تصميم البراندات';
             break;
         case 's2':
-            categoryName = 'تصميم المطبوعات';
+            categoryName = 'الإعلانات التسويقية';
             break;
         case 's3':
-            categoryName = 'السوشيال ميديا';
+            categoryName = 'تصاميم السوشيال ميديا';
             break;
         case 's4':
-            categoryName = 'التغليف';
+            categoryName = 'التغليف والمنتجات';
             break;
         case 's5':
-            categoryName = 'تصميم الشعارات';
+            categoryName = 'الهويات البصرية';
             break;
         case 's7':
-            categoryName = 'تصميم الإعلانات';
+            categoryName = 'المطبوعات الإعلانية';
             break;
         case 's8':
-            categoryName = 'تصميم المواقع';
+            categoryName = 'تصميم الويب والتطبيقات';
             break;
     }
     projectCategory.textContent = categoryName;

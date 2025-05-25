@@ -57,6 +57,16 @@ body {
     text-align: center;
 }
 
+.logo a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.logo a:hover {
+    color: var(--accent-color);
+}
+
 .nav-links {
     display: flex;
     list-style: none;
@@ -1194,4 +1204,36 @@ footer {
     color: var(--white);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Email Button */
+.email-button-container {
+    display: flex;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.email-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #5e00d2; /* لون بنفسجي مطابق للصورة */
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(94, 0, 210, 0.3);
+}
+
+.email-button i {
+    margin-left: 10px;
+    font-size: 1.2rem;
+}
+
+.email-button:hover {
+    background-color: #7000f5;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(94, 0, 210, 0.4);
 } 
