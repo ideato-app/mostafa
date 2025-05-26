@@ -14,6 +14,71 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 });
 
+// Theme toggle functionality
+function initThemeToggle() {
+    const themeToggleBtn = document.querySelector('.theme-toggle');
+    const htmlElement = document.documentElement;
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const currentTheme = localStorage.getItem('theme');
+    
+    // Set initial theme based on localStorage or system preference
+    if (currentTheme) {
+        htmlElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+    } else if (prefersDarkScheme.matches) {
+        htmlElement.setAttribute('data-theme', 'dark');
+        updateThemeIcon('dark');
+    }
+    
+    // Toggle theme when button is clicked
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', function() {
+            const currentTheme = htmlElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            // Apply theme transition animation
+            htmlElement.classList.add('theme-transition');
+            
+            // Update theme
+            htmlElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Update icon
+            updateThemeIcon(newTheme);
+            
+            // Remove transition class after animation completes
+            setTimeout(() => {
+                htmlElement.classList.remove('theme-transition');
+            }, 300);
+        });
+    }
+    
+    // Update theme icon based on current theme
+    function updateThemeIcon(theme) {
+        if (!themeToggleBtn) return;
+        
+        const icon = themeToggleBtn.querySelector('i');
+        if (icon) {
+            if (theme === 'dark') {
+                icon.className = 'fas fa-sun';
+                themeToggleBtn.setAttribute('title', 'التبديل إلى الوضع الفاتح');
+            } else {
+                icon.className = 'fas fa-moon';
+                themeToggleBtn.setAttribute('title', 'التبديل إلى الوضع الداكن');
+            }
+        }
+    }
+    
+    // Listen for system theme changes
+    prefersDarkScheme.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            const newTheme = e.matches ? 'dark' : 'light';
+            htmlElement.setAttribute('data-theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+    });
+}
+
 // Smooth scroll for navigation links with performance optimization
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -375,6 +440,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add critical functionality first
     addPreloader();
     initMobileNav();
+    initThemeToggle();
     
     // Defer non-critical functionality
     setTimeout(() => {
