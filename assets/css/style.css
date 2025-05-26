@@ -2303,4 +2303,44 @@ img {
 
 [data-theme="dark"] .categories-toggle-btn:hover {
     background-color: var(--secondary-color);
+}
+
+/* Skill Icons Styles */
+.icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+    margin-bottom: 1rem;
+}
+
+.skill-icon {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.skill-card:hover .skill-icon {
+    transform: scale(1.2);
+}
+
+.software-icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 1rem;
+    height: 60px;
+    align-items: center;
+}
+
+.software-icon {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.skill-card:hover .software-icon {
+    transform: scale(1.2);
 } 
