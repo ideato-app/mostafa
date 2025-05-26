@@ -20,14 +20,21 @@ function initThemeToggle() {
     const htmlElement = document.documentElement;
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
     const currentTheme = localStorage.getItem('theme');
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    
+    // Theme colors for browser UI
+    const lightThemeColor = '#1e3a8a'; // Deep Blue for light theme
+    const darkThemeColor = '#3b82f6';  // Bright Blue for dark theme
     
     // Set initial theme based on localStorage or system preference
     if (currentTheme) {
         htmlElement.setAttribute('data-theme', currentTheme);
         updateThemeIcon(currentTheme);
+        updateThemeColorMeta(currentTheme);
     } else if (prefersDarkScheme.matches) {
         htmlElement.setAttribute('data-theme', 'dark');
         updateThemeIcon('dark');
+        updateThemeColorMeta('dark');
     }
     
     // Toggle theme when button is clicked
@@ -43,8 +50,9 @@ function initThemeToggle() {
             htmlElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             
-            // Update icon
+            // Update icon and meta tag
             updateThemeIcon(newTheme);
+            updateThemeColorMeta(newTheme);
             
             // Remove transition class after animation completes
             setTimeout(() => {
@@ -69,12 +77,20 @@ function initThemeToggle() {
         }
     }
     
+    // Update theme-color meta tag for browser UI
+    function updateThemeColorMeta(theme) {
+        if (themeColorMeta) {
+            themeColorMeta.setAttribute('content', theme === 'dark' ? darkThemeColor : lightThemeColor);
+        }
+    }
+    
     // Listen for system theme changes
     prefersDarkScheme.addEventListener('change', (e) => {
         if (!localStorage.getItem('theme')) {
             const newTheme = e.matches ? 'dark' : 'light';
             htmlElement.setAttribute('data-theme', newTheme);
             updateThemeIcon(newTheme);
+            updateThemeColorMeta(newTheme);
         }
     });
 }

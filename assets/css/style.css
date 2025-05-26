@@ -1,37 +1,37 @@
 /* Reset and Base Styles */
 :root {
-    /* Light Theme Variables (Default) */
-    --primary-color: #0d2e63; /* Navy Blue */
-    --secondary-color: #0a4385; /* Dark Blue */
-    --accent-color: #4169e1; /* Royal Blue */
-    --text-color: #333;
-    --light-bg: #f5f5f5; /* Off-white */
+    /* Light Theme Variables (Default) - Blue Context */
+    --primary-color: #1e3a8a; /* Deep Blue */
+    --secondary-color: #2563eb; /* Royal Blue */
+    --accent-color: #3b82f6; /* Bright Blue */
+    --text-color: #1e293b;
+    --light-bg: #f0f9ff; /* Light Blue Background */
     --white: #ffffff;
     --card-bg: #ffffff;
-    --shadow-color: rgba(0,0,0,0.1);
+    --shadow-color: rgba(37, 99, 235, 0.1);
     --footer-text: #ffffff;
     --transition: all 0.3s ease;
-    --gradient-start: #f5f5f5;
-    --gradient-end: #e8eaf6;
-    --skill-bg: rgba(65, 105, 225, 0.1);
-    --border-color: rgba(0,0,0,0.05);
+    --gradient-start: #f0f9ff;
+    --gradient-end: #dbeafe;
+    --skill-bg: rgba(59, 130, 246, 0.1);
+    --border-color: rgba(37, 99, 235, 0.1);
 }
 
-/* Dark Theme Variables */
+/* Dark Theme Variables - Blue Context */
 [data-theme="dark"] {
-    --primary-color: #4169e1; /* Royal Blue */
-    --secondary-color: #5e81f4; /* Lighter Blue */
-    --accent-color: #7ba0ff; /* Light Blue */
-    --text-color: #e0e0e0;
-    --light-bg: #1a1a2e; /* Dark Blue-Black */
-    --white: #252541; /* Dark Blue-Gray */
-    --card-bg: #252541;
-    --shadow-color: rgba(0,0,0,0.3);
-    --footer-text: #e0e0e0;
-    --gradient-start: #1a1a2e;
-    --gradient-end: #16213e;
-    --skill-bg: rgba(65, 105, 225, 0.2);
-    --border-color: rgba(255,255,255,0.05);
+    --primary-color: #3b82f6; /* Bright Blue */
+    --secondary-color: #60a5fa; /* Light Blue */
+    --accent-color: #93c5fd; /* Very Light Blue */
+    --text-color: #e0f2fe;
+    --light-bg: #0f172a; /* Dark Blue-Black */
+    --white: #1e293b; /* Dark Blue-Gray */
+    --card-bg: #1e293b;
+    --shadow-color: rgba(37, 99, 235, 0.3);
+    --footer-text: #e0f2fe;
+    --gradient-start: #0f172a;
+    --gradient-end: #1e3a8a;
+    --skill-bg: rgba(59, 130, 246, 0.2);
+    --border-color: rgba(59, 130, 246, 0.2);
 }
 
 /* Theme transition animation */
