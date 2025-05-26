@@ -20,12 +20,14 @@ body {
     line-height: 1.6;
     color: var(--text-color);
     background-color: var(--light-bg);
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
+    width: 100%;
 }
 
 /* Header & Navigation */
@@ -36,6 +38,17 @@ body {
     width: 100%;
     top: 0;
     z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+/* Header scroll effect */
+.header.scroll-down {
+    transform: translateY(-100%);
+}
+
+.header.scroll-up {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .nav {
@@ -55,6 +68,7 @@ body {
     text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
     margin: 0 auto;
     text-align: center;
+    transition: var(--transition);
 }
 
 .logo a {
@@ -65,6 +79,7 @@ body {
 
 .logo a:hover {
     color: var(--accent-color);
+    transform: scale(1.05);
 }
 
 .nav-links {
@@ -112,17 +127,30 @@ body {
     gap: 2rem;
     background: linear-gradient(135deg, #f5f5f5 0%, #e8eaf6 100%);
     position: relative;
+    min-height: 90vh;
 }
 
 .hero-content {
     flex: 1;
     position: relative;
+    animation: fadeInRight 1s ease-out;
 }
 
 .hero h1 {
     font-size: 2.5rem;
     color: var(--primary-color);
     margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.hero h1:after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 80px;
+    height: 3px;
+    background-color: var(--accent-color);
 }
 
 .hero p {
@@ -136,6 +164,7 @@ body {
     max-width: 450px;
     display: flex;
     justify-content: center;
+    animation: fadeInLeft 1s ease-out;
 }
 
 .hero-image img {
@@ -186,6 +215,25 @@ body {
     font-weight: 600;
     transition: var(--transition);
     box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.cta-button:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+    transition: all 0.5s ease;
+    z-index: -1;
+}
+
+.cta-button:hover:before {
+    width: 100%;
 }
 
 .cta-button:hover {
@@ -205,6 +253,18 @@ body {
     color: var(--primary-color);
     margin-bottom: 3rem;
     position: relative;
+    font-size: 2.2rem;
+}
+
+.about h2:after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: var(--accent-color);
 }
 
 .about-content {
@@ -215,6 +275,12 @@ body {
     box-shadow: 0 5px 20px rgba(0,0,0,0.05);
     padding: 2.5rem;
     position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
 }
 
 .about-intro {
@@ -580,55 +646,50 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 992px) {
+    .hero {
+        padding: 7rem 2rem 3rem;
+    }
+    
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+}
+
 @media (max-width: 768px) {
     .nav {
-        display: flex;
-        justify-content: center;
-        align-items: center;
         padding: 1rem;
-        position: relative;
-        height: 60px; /* Fixed height for navigation */
     }
     
     .mobile-toggle {
         display: block;
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 1010;
-        padding: 8px;
-        background-color: transparent;
-        border: none;
-        cursor: pointer;
-        font-size: 1.5rem;
-        color: var(--primary-color);
-        outline: none;
+        z-index: 1001;
     }
     
     .mobile-toggle:hover,
     .mobile-toggle:focus {
-        color: var(--accent-color);
+        background-color: rgba(0,0,0,0.05);
     }
     
     .nav-links {
-        display: none;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        left: 0;
-        width: 100%;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 70%;
+        height: 100vh;
         background-color: var(--white);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         flex-direction: column;
+        justify-content: center;
         align-items: center;
-        padding: 1rem 0;
+        gap: 2rem;
+        transition: all 0.4s ease-in-out;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.1);
         z-index: 1000;
-        gap: 1rem;
+        padding: 2rem;
     }
     
     .nav-links.active {
-        display: flex;
+        right: 0;
     }
     
     .nav-links li {
@@ -638,30 +699,30 @@ body {
     
     .nav-links li a {
         display: block;
-        padding: 0.8rem 1rem;
-        width: 100%;
+        padding: 1rem;
+        font-size: 1.2rem;
     }
     
     .logo {
-        margin: 0 auto;
+        font-size: 1.3rem;
     }
     
     .hero {
         flex-direction: column;
-        text-align: center;
         padding-top: 6rem;
+        text-align: center;
+        gap: 3rem;
     }
     
     .hero h1:after {
         left: 50%;
         transform: translateX(-50%);
     }
-
+    
     .about-content {
-        flex-direction: column;
-        text-align: center;
+        padding: 1.5rem;
     }
-
+    
     .skills-grid {
         grid-template-columns: 1fr;
     }
@@ -671,103 +732,225 @@ body {
     }
     
     .contact-email {
-        padding: 0.8rem 1.5rem;
-        font-size: 1rem;
+        padding: 1rem;
     }
     
     .social-contact {
-        gap: 1rem;
+        margin-top: 1.5rem;
     }
     
     .social-contact a {
         width: 45px;
         height: 45px;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
     }
     
     .hero-image, .about-image {
-        display: flex;
-        justify-content: center;
+        max-width: 300px;
         margin: 0 auto;
     }
     
     .hero-image img, .about-image img {
+        max-width: 100%;
+    }
+}
+
+/* Specific styles for 6-inch mobile screens (approximately 360-375px width) */
+@media (max-width: 375px) {
+    .hero {
+        padding: 5rem 1rem 2rem;
+        min-height: auto;
+    }
+    
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    .hero-image {
+        max-width: 250px;
+    }
+    
+    .cta-button {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .about h2, 
+    .skills h2, 
+    .contact h2 {
+        font-size: 1.8rem;
+    }
+    
+    .about-content {
+        padding: 1.2rem;
+    }
+    
+    .about-intro h3 {
+        font-size: 1.5rem;
+    }
+    
+    .skill-card {
+        padding: 1rem;
+    }
+    
+    .skill-card h3 {
+        font-size: 0.9rem;
+    }
+    
+    .contact-links {
+        flex-direction: column;
+    }
+    
+    .email-button {
+        font-size: 0.9rem;
+        padding: 0.8rem;
+    }
+    
+    .social-contact a {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Specific styles for 6.8-inch mobile screens (approximately 390-414px width) */
+@media (min-width: 376px) and (max-width: 414px) {
+    .hero {
+        padding: 5.5rem 1.2rem 2.5rem;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero p {
+        font-size: 1.05rem;
+    }
+    
+    .hero-image {
         max-width: 280px;
-        margin: 0 auto;
+    }
+    
+    .cta-button {
+        padding: 0.9rem 1.8rem;
+        font-size: 1rem;
+    }
+    
+    .about h2, 
+    .skills h2, 
+    .contact h2 {
+        font-size: 2rem;
     }
 }
 
-@media (max-width: 480px) {
-    .hero-image img, .about-image img {
-        max-width: 240px;
+/* Animation Keyframes */
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
 }
 
-/* Animations */
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fix for AOS animations */
 [data-aos] {
-    opacity: 0;
-    transition-property: transform, opacity;
+    pointer-events: none;
 }
 
 [data-aos].aos-animate {
-    opacity: 1;
+    pointer-events: auto;
 }
 
-/* Remove any border or line that might be visible */
+/* Optimize images */
 img {
-    border: none;
-    outline: none;
+    max-width: 100%;
+    height: auto;
 }
 
-/* Remove any potential purple borders */
-.hero-image, 
-.about-image {
-    border: none;
+/* Improve touch targets for mobile */
+.nav-links a,
+.cta-button,
+.social-contact a {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Make sure no unwanted borders or decorations appear */
-.hero:before,
-.hero:after,
-.hero h1:before,
-.hero h1:after,
-.about:before,
-.about:after,
-.about h2:before,
-.about h2:after,
-.skills:before,
-.skills:after,
-.skills h2:before,
-.skills h2:after,
-.portfolio:before,
-.portfolio:after,
-.portfolio h1:before,
-.portfolio h1:after,
-.contact:before,
-.contact:after,
-.contact h2:before,
-.contact h2:after,
-.container:before,
-.container:after,
-section:before,
-section:after,
-main:before,
-main:after {
-    display: none !important;
-    content: none !important;
-    border: none !important;
-    background: none !important;
+/* Ensure email button is responsive */
+.email-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
-.container, 
-.section, 
-main, 
-section, 
-header, 
-footer {
-    border: none !important;
-    box-shadow: none !important;
-    position: relative;
-    overflow: visible;
+.email-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Add overlay when mobile menu is active */
+.nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.nav-overlay.active {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Portfolio Behance Style */
