@@ -1,32 +1,59 @@
-// Initialize AOS (Animate On Scroll)
-AOS.init({
-    duration: 800,
-    easing: 'ease-in-out',
-    once: true,
-    mirror: false,
-    offset: 50,
-    delay: 100
+// Initialize AOS (Animate On Scroll) with performance optimizations
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS with a small delay for better performance
+    setTimeout(() => {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            mirror: false,
+            offset: 50,
+            delay: 100,
+            disable: window.innerWidth < 768 && 'mobile' // Disable on mobile for better performance
+        });
+    }, 100);
 });
 
-// Smooth scroll for navigation links
+// Smooth scroll for navigation links with performance optimization
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const target = document.querySelector(targetId);
         if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+            // Use requestAnimationFrame for smoother scrolling
+            requestAnimationFrame(() => {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
             });
         }
     });
 });
 
-// Add active class to navigation links on scroll
+// Add active class to navigation links on scroll with throttle
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-links a');
 
-window.addEventListener('scroll', () => {
+// Throttle function to limit execution frequency
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+// Throttled scroll event handler
+window.addEventListener('scroll', throttle(() => {
     let current = '';
     sections.forEach(section => {
         const sectionTop = section.offsetTop;
@@ -42,13 +69,13 @@ window.addEventListener('scroll', () => {
             link.classList.add('active');
         }
     });
-});
+}, 100));
 
-// Header scroll effect
+// Header scroll effect with throttle
 let lastScrollTop = 0;
 const header = document.querySelector('.header');
 
-window.addEventListener('scroll', () => {
+window.addEventListener('scroll', throttle(() => {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     
     if (scrollTop > lastScrollTop && scrollTop > 100) {
@@ -62,9 +89,45 @@ window.addEventListener('scroll', () => {
     }
     
     lastScrollTop = scrollTop;
-});
+}, 100));
 
-// Fix skill progress bars animation
+// Enhanced lazy loading for images
+function enhancedLazyLoad() {
+    // Use Intersection Observer for better performance
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const src = img.getAttribute('data-src');
+                    
+                    if (src) {
+                        img.src = src;
+                        img.removeAttribute('data-src');
+                    }
+                    
+                    observer.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '200px 0px', // Start loading images before they appear in viewport
+            threshold: 0.01
+        });
+        
+        // Convert all images with loading="lazy" to use our enhanced lazy loading
+        document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+            // Only use our custom lazy loading for browsers that don't support native lazy loading
+            if (!('loading' in HTMLImageElement.prototype)) {
+                const src = img.src;
+                img.setAttribute('data-src', src);
+                img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E'; // Tiny placeholder
+                imageObserver.observe(img);
+            }
+        });
+    }
+}
+
+// Fix skill progress bars animation with Intersection Observer
 const animateSkillBars = () => {
     const skillCards = document.querySelectorAll('.skill-card');
     
@@ -80,10 +143,10 @@ const animateSkillBars = () => {
                     progressBar.style.width = '0%';
                     
                     // Then animate to the target width
-                    setTimeout(() => {
+                    requestAnimationFrame(() => {
                         progressBar.style.transition = 'width 1s ease-in-out';
                         progressBar.style.width = targetWidth;
-                    }, 100);
+                    });
                 }
                 observer.unobserve(entry.target);
             }
@@ -95,13 +158,11 @@ const animateSkillBars = () => {
 
 // Enhanced Mobile navigation toggle
 function initMobileNav() {
-    console.log('Initializing mobile navigation');
     const navLinks = document.querySelector('.nav-links');
     const mobileToggle = document.querySelector('.mobile-toggle');
     let navOverlay = document.querySelector('.nav-overlay');
     
     if (!mobileToggle || !navLinks) {
-        console.error('Mobile toggle or nav links not found');
         return;
     }
     
@@ -116,7 +177,6 @@ function initMobileNav() {
     mobileToggle.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Mobile toggle clicked');
         
         // Toggle active class
         navLinks.classList.toggle('active');
@@ -161,20 +221,12 @@ function initMobileNav() {
             document.body.style.overflow = '';
         }
     });
-    
-    // Handle resize events
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768 && navLinks.classList.contains('active')) {
-            navLinks.classList.remove('active');
-            navOverlay.classList.remove('active');
-            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
-            document.body.style.overflow = '';
-        }
-    });
 }
 
 // Add touch swipe functionality for mobile
 function addSwipeSupport() {
+    if (window.innerWidth > 768) return;
+    
     let touchStartX = 0;
     let touchEndX = 0;
     const navLinks = document.querySelector('.nav-links');
@@ -185,12 +237,12 @@ function addSwipeSupport() {
     
     document.addEventListener('touchstart', function(e) {
         touchStartX = e.changedTouches[0].screenX;
-    }, false);
+    }, { passive: true }); // Passive event listener for better performance
     
     document.addEventListener('touchend', function(e) {
         touchEndX = e.changedTouches[0].screenX;
         handleSwipe();
-    }, false);
+    }, { passive: true });
     
     function handleSwipe() {
         // Swipe right to open menu
@@ -211,7 +263,7 @@ function addSwipeSupport() {
     }
 }
 
-// Add preloader
+// Add preloader with performance optimization
 function addPreloader() {
     const preloader = document.createElement('div');
     preloader.className = 'preloader';
@@ -222,52 +274,6 @@ function addPreloader() {
         </div>
     `;
     document.body.appendChild(preloader);
-    
-    window.addEventListener('load', function() {
-        setTimeout(function() {
-            preloader.style.opacity = '0';
-            setTimeout(function() {
-                preloader.style.display = 'none';
-                document.body.classList.add('loaded');
-            }, 500);
-        }, 500);
-    });
-}
-
-// Lazy load images
-function lazyLoadImages() {
-    const images = document.querySelectorAll('img[loading="lazy"]');
-    
-    if ('loading' in HTMLImageElement.prototype) {
-        // Browser supports native lazy loading
-        console.log('Browser supports native lazy loading');
-    } else {
-        // Fallback for browsers that don't support lazy loading
-        const lazyImageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.removeAttribute('loading');
-                    lazyImageObserver.unobserve(img);
-                }
-            });
-        });
-        
-        images.forEach(img => {
-            lazyImageObserver.observe(img);
-        });
-    }
-}
-
-// When DOM content is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM content loaded');
-    animateSkillBars();
-    initMobileNav();
-    addSwipeSupport();
-    addPreloader();
-    lazyLoadImages();
     
     // Add CSS for preloader
     const style = document.createElement('style');
@@ -321,6 +327,66 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     `;
     document.head.appendChild(style);
+    
+    // Remove preloader after page loads
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            preloader.style.opacity = '0';
+            setTimeout(function() {
+                preloader.style.display = 'none';
+                document.body.classList.add('loaded');
+            }, 500);
+        }, 500);
+    });
+}
+
+// Side buttons animation with performance optimization
+function initSideButtons() {
+    const sideButtons = document.querySelectorAll('.side-button');
+    
+    if (sideButtons.length === 0) return;
+    
+    // Add staggered entrance animation
+    sideButtons.forEach((button, index) => {
+        button.style.animationDelay = `${index * 0.2}s`;
+    });
+    
+    // Smooth scroll for contact button
+    const contactButton = document.querySelector('.side-button.contact');
+    if (contactButton) {
+        contactButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                // Use requestAnimationFrame for smoother scrolling
+                requestAnimationFrame(() => {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+            }
+        });
+    }
+}
+
+// Initialize all functionality when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Add critical functionality first
+    addPreloader();
+    initMobileNav();
+    
+    // Defer non-critical functionality
+    setTimeout(() => {
+        animateSkillBars();
+        enhancedLazyLoad();
+        initSideButtons();
+        
+        // Add touch support only on mobile devices
+        if ('ontouchstart' in window) {
+            addSwipeSupport();
+        }
+    }, 100);
 });
 
 // Make sure to initialize again when window loads
