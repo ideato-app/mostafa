@@ -15,6 +15,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Modal and lightbox functionality
     initModalEvents();
+    
+    // Initialize lazy loading
+    initLazyLoading();
+    
+    // Initialize expand section buttons
+    initExpandSectionButtons();
+    
+    // Initialize categories toggle button
+    initCategoriesToggle();
 });
 
 /**
@@ -40,6 +49,9 @@ function initPortfolioFilter() {
                 portfolioSections.forEach(section => {
                     section.style.display = 'block';
                     
+                    // Reset expand section buttons
+                    resetExpandSectionButtons();
+                    
                     // Trigger AOS refresh for newly visible elements
                     setTimeout(() => {
                         AOS.refresh();
@@ -49,6 +61,9 @@ function initPortfolioFilter() {
                 portfolioSections.forEach(section => {
                     if (section.getAttribute('data-category') === filter) {
                         section.style.display = 'block';
+                        
+                        // Reset expand button for this section
+                        resetSectionState(section);
                     } else {
                         section.style.display = 'none';
                     }
@@ -59,6 +74,9 @@ function initPortfolioFilter() {
                     AOS.refresh();
                 }, 100);
             }
+            
+            // Trigger lazy loading for newly visible images
+            initLazyLoading();
         });
     });
 }
@@ -74,7 +92,7 @@ function initPortfolioItemEvents() {
             const folder = this.getAttribute('data-folder');
             const index = parseInt(this.getAttribute('data-index'));
             const title = this.querySelector('h3').textContent;
-            const description = this.querySelector('p').textContent;
+            const description = this.querySelector('p') ? this.querySelector('p').textContent : '';
             
             openPortfolioModal(folder, index, title, description);
         });
@@ -143,6 +161,164 @@ function initModalEvents() {
 }
 
 /**
+ * Initialize lazy loading for images
+ */
+function initLazyLoading() {
+    const lazyImages = document.querySelectorAll('.lazy-image');
+    
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const src = img.getAttribute('data-src');
+                    
+                    img.onload = function() {
+                        img.classList.add('loaded');
+                        const loader = img.parentNode.querySelector('.image-loader');
+                        if (loader) {
+                            loader.classList.add('hidden');
+                        }
+                    };
+                    
+                    img.src = src;
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
+        
+        lazyImages.forEach(img => {
+            imageObserver.observe(img);
+        });
+    } else {
+        // Fallback for browsers that don't support IntersectionObserver
+        lazyImages.forEach(img => {
+            const src = img.getAttribute('data-src');
+            img.src = src;
+            
+            img.onload = function() {
+                img.classList.add('loaded');
+                const loader = img.parentNode.querySelector('.image-loader');
+                if (loader) {
+                    loader.classList.add('hidden');
+                }
+            };
+        });
+    }
+}
+
+/**
+ * Initialize expand section buttons functionality
+ */
+function initExpandSectionButtons() {
+    const expandButtons = document.querySelectorAll('.expand-section-btn');
+    
+    expandButtons.forEach(button => {
+        const category = button.getAttribute('data-category');
+        const section = document.querySelector(`.portfolio-section[data-category="${category}"]`);
+        const items = Array.from(section.querySelectorAll('.portfolio-item-behance'));
+        
+        // Initially hide items beyond the first 3
+        items.forEach((item, index) => {
+            if (index >= 3) {
+                item.style.display = 'none';
+            }
+        });
+        
+        // If there are 3 or fewer items, hide the expand button
+        if (items.length <= 3) {
+            button.classList.add('hidden');
+        }
+        
+        button.addEventListener('click', function() {
+            const hiddenItems = Array.from(section.querySelectorAll('.portfolio-item-behance[style="display: none;"]'));
+            
+            // If there are hidden items, show them
+            if (hiddenItems.length > 0) {
+                hiddenItems.forEach(item => {
+                    item.style.display = 'block';
+                });
+                
+                // Change button text and add expanded class
+                button.textContent = 'عرض أقل';
+                button.classList.add('expanded');
+                
+                // Trigger lazy loading for newly visible images
+                initLazyLoading();
+                
+                // Highlight the newly shown items
+                setTimeout(() => {
+                    hiddenItems.forEach(item => {
+                        item.classList.add('highlight-item');
+                        setTimeout(() => {
+                            item.classList.remove('highlight-item');
+                        }, 1500);
+                    });
+                }, 300);
+                
+                // Refresh AOS animations
+                setTimeout(() => {
+                    AOS.refresh();
+                }, 100);
+            } else {
+                // Hide items beyond the first 3
+                items.forEach((item, index) => {
+                    if (index >= 3) {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // Change button text back and remove expanded class
+                button.textContent = 'عرض المزيد من الأعمال';
+                button.classList.remove('expanded');
+                
+                // Scroll back to the top of the section
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+}
+
+/**
+ * Reset all expand section buttons to initial state
+ */
+function resetExpandSectionButtons() {
+    const sections = document.querySelectorAll('.portfolio-section');
+    sections.forEach(section => {
+        resetSectionState(section);
+    });
+}
+
+/**
+ * Reset a section to its initial state
+ * @param {HTMLElement} section - The section to reset
+ */
+function resetSectionState(section) {
+    const items = Array.from(section.querySelectorAll('.portfolio-item-behance'));
+    const expandBtn = section.querySelector('.expand-section-btn');
+    
+    if (expandBtn) {
+        expandBtn.textContent = 'عرض المزيد من الأعمال';
+        expandBtn.classList.remove('expanded');
+        
+        if (items.length <= 3) {
+            expandBtn.classList.add('hidden');
+        } else {
+            expandBtn.classList.remove('hidden');
+        }
+    }
+    
+    // Show only the first 3 items
+    items.forEach((item, index) => {
+        if (index < 3) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+/**
  * Open portfolio modal with project details
  * @param {string} folder - Project folder name
  * @param {number} index - Starting image index
@@ -161,31 +337,31 @@ function openPortfolioModal(folder, index, title, description) {
     
     // Set project details
     modalTitle.textContent = title;
-    modalDescription.textContent = description;
+    modalDescription.textContent = description || '';
     
     // Set category based on folder name
     let categoryName = '';
     switch (folder) {
         case 's1':
-            categoryName = 'تصميم البراندات';
+            categoryName = 'المنتجات';
             break;
         case 's2':
-            categoryName = 'الإعلانات التسويقية';
+            categoryName = 'الأعمال';
             break;
         case 's3':
-            categoryName = 'تصاميم السوشيال ميديا';
+            categoryName = 'الصحة';
             break;
         case 's4':
-            categoryName = 'التغليف والمنتجات';
+            categoryName = 'الجمال';
             break;
         case 's5':
-            categoryName = 'الهويات البصرية';
+            categoryName = 'الأمان';
             break;
         case 's7':
-            categoryName = 'المطبوعات الإعلانية';
+            categoryName = 'السفر';
             break;
         case 's8':
-            categoryName = 'تصميم الويب والتطبيقات';
+            categoryName = 'الجمال';
             break;
     }
     projectCategory.textContent = categoryName;
@@ -236,9 +412,7 @@ function loadFolderImages(folder, container) {
                 'WhatsApp Image 2025-05-25 at 4.45.10 PM.jpeg',
                 'WhatsApp Image 2025-05-25 at 4.45.10 PM (1).jpeg',
                 'WhatsApp Image 2025-05-25 at 4.45.11 PM.jpeg',
-                'WhatsApp Image 2025-05-25 at 4.45.11 PM (1).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.45.11 PM (2).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.45.11 PM (3).jpeg'
+                'WhatsApp Image 2025-05-25 at 4.45.11 PM (1).jpeg'
             ];
             break;
         case 's4':
@@ -248,13 +422,7 @@ function loadFolderImages(folder, container) {
                 'WhatsApp Image 2025-05-25 at 4.47.02 PM.jpeg',
                 'WhatsApp Image 2025-05-25 at 4.47.06 PM.jpeg',
                 'WhatsApp Image 2025-05-25 at 4.47.07 PM.jpeg',
-                'WhatsApp Image 2025-05-25 at 4.47.07 PM (1).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.47.08 PM.jpeg',
-                'WhatsApp Image 2025-05-25 at 4.47.08 PM (1).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.47.08 PM (2).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.47.09 PM.jpeg',
-                'WhatsApp Image 2025-05-25 at 4.47.11 PM.jpeg',
-                'WhatsApp Image 2025-05-25 at 4.47.11 PM (1).jpeg'
+                'WhatsApp Image 2025-05-25 at 4.47.07 PM (1).jpeg'
             ];
             break;
         case 's5':
@@ -263,14 +431,7 @@ function loadFolderImages(folder, container) {
                 'WhatsApp Image 2025-05-25 at 4.55.34 PM (1).jpeg',
                 'WhatsApp Image 2025-05-25 at 4.55.34 PM (2).jpeg',
                 'WhatsApp Image 2025-05-25 at 4.55.35 PM.jpeg',
-                'WhatsApp Image 2025-05-25 at 4.55.35 PM (1).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.55.35 PM (2).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.55.35 PM (3).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.55.35 PM (4).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.55.35 PM (5).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.55.36 PM.jpeg',
-                'WhatsApp Image 2025-05-25 at 4.55.36 PM (1).jpeg',
-                'WhatsApp Image 2025-05-25 at 4.55.36 PM (2).jpeg'
+                'WhatsApp Image 2025-05-25 at 4.55.35 PM (1).jpeg'
             ];
             break;
         case 's7':
@@ -279,14 +440,7 @@ function loadFolderImages(folder, container) {
                 'WhatsApp Image 2025-05-25 at 5.03.33 PM.jpeg',
                 'WhatsApp Image 2025-05-25 at 5.03.33 PM (1).jpeg',
                 'WhatsApp Image 2025-05-25 at 5.03.33 PM (2).jpeg',
-                'WhatsApp Image 2025-05-25 at 5.03.33 PM (3).jpeg',
-                'WhatsApp Image 2025-05-25 at 5.03.35 PM.jpeg',
-                'WhatsApp Image 2025-05-25 at 5.03.35 PM (1).jpeg',
-                'WhatsApp Image 2025-05-25 at 5.03.36 PM.jpeg',
-                'WhatsApp Image 2025-05-25 at 5.03.36 PM (1).jpeg',
-                'WhatsApp Image 2025-05-25 at 5.03.36 PM (2).jpeg',
-                'WhatsApp Image 2025-05-25 at 5.03.36 PM (3).jpeg',
-                'WhatsApp Image 2025-05-25 at 5.03.37 PM.jpeg'
+                'WhatsApp Image 2025-05-25 at 5.03.33 PM (3).jpeg'
             ];
             break;
         case 's8':
@@ -305,11 +459,16 @@ function loadFolderImages(folder, container) {
     
     // Add images to container
     images.forEach((image, idx) => {
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'modal-image-container';
+        
         const img = document.createElement('img');
         img.src = folderPath + image;
         img.alt = 'صورة المشروع';
         img.loading = 'lazy';
-        container.appendChild(img);
+        
+        imgContainer.appendChild(img);
+        container.appendChild(imgContainer);
         
         // Add click event to open lightbox
         img.addEventListener('click', function() {
@@ -333,4 +492,51 @@ function openLightbox(imageSrc, index) {
     
     // Show lightbox
     lightbox.style.display = 'flex';
+}
+
+/**
+ * Initialize categories toggle button functionality
+ */
+function initCategoriesToggle() {
+    const toggleBtn = document.querySelector('.categories-toggle-btn');
+    const hiddenCategories = document.querySelectorAll('.portfolio-category.mobile-hidden');
+    
+    if (toggleBtn && hiddenCategories.length > 0) {
+        toggleBtn.addEventListener('click', function() {
+            const isExpanded = toggleBtn.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // Collapse categories
+                hiddenCategories.forEach(category => {
+                    category.classList.add('mobile-hidden');
+                    category.style.display = '';
+                });
+                toggleBtn.textContent = 'عرض المزيد';
+                toggleBtn.classList.remove('expanded');
+            } else {
+                // Expand categories
+                hiddenCategories.forEach(category => {
+                    category.classList.remove('mobile-hidden');
+                    category.style.display = 'block';
+                });
+                toggleBtn.textContent = 'عرض أقل';
+                toggleBtn.classList.add('expanded');
+            }
+        });
+        
+        // Check screen size on window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                hiddenCategories.forEach(category => {
+                    category.style.display = '';
+                });
+            } else {
+                if (!toggleBtn.classList.contains('expanded')) {
+                    hiddenCategories.forEach(category => {
+                        category.style.display = '';
+                    });
+                }
+            }
+        });
+    }
 } 
