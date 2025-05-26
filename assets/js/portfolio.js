@@ -24,6 +24,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize categories toggle button
     initCategoriesToggle();
+    
+    // Check button visibility after a short delay
+    setTimeout(checkButtonVisibility, 500);
+    
+    // Check button visibility again after images might have loaded
+    setTimeout(checkButtonVisibility, 2000);
+    
+    // Add window load event for final check
+    window.addEventListener('load', function() {
+        setTimeout(checkButtonVisibility, 500);
+    });
 });
 
 /**
@@ -211,12 +222,20 @@ function initLazyLoading() {
  * Initialize expand section buttons functionality
  */
 function initExpandSectionButtons() {
+    // First, create any missing portfolio items
+    createMissingPortfolioItems();
+    
     const expandButtons = document.querySelectorAll('.expand-section-btn');
     
     expandButtons.forEach(button => {
         const category = button.getAttribute('data-category');
         const section = document.querySelector(`.portfolio-section[data-category="${category}"]`);
         const items = Array.from(section.querySelectorAll('.portfolio-item-behance'));
+        
+        // Get the total number of images for this category from our data
+        const totalImages = getTotalImagesForCategory(category);
+        
+        console.log(`Category ${category} has ${items.length} items in DOM and ${totalImages} total images`);
         
         // Initially hide items beyond the first 3
         items.forEach((item, index) => {
@@ -225,17 +244,20 @@ function initExpandSectionButtons() {
             }
         });
         
-        // If there are 3 or fewer items, hide the expand button
-        if (items.length <= 3) {
+        // If there are 3 or fewer total images, hide the expand button
+        if (totalImages <= 3) {
             button.classList.add('hidden');
+        } else {
+            button.classList.remove('hidden');
         }
         
         button.addEventListener('click', function() {
-            const hiddenItems = Array.from(section.querySelectorAll('.portfolio-item-behance[style="display: none;"]'));
+            // Check if button is expanded
+            const isExpanded = button.classList.contains('expanded');
             
-            // If there are hidden items, show them
-            if (hiddenItems.length > 0) {
-                hiddenItems.forEach(item => {
+            if (!isExpanded) {
+                // Show all items in this section
+                items.forEach(item => {
                     item.style.display = 'block';
                 });
                 
@@ -248,11 +270,13 @@ function initExpandSectionButtons() {
                 
                 // Highlight the newly shown items
                 setTimeout(() => {
-                    hiddenItems.forEach(item => {
-                        item.classList.add('highlight-item');
-                        setTimeout(() => {
-                            item.classList.remove('highlight-item');
-                        }, 1500);
+                    items.forEach((item, index) => {
+                        if (index >= 3) {
+                            item.classList.add('highlight-item');
+                            setTimeout(() => {
+                                item.classList.remove('highlight-item');
+                            }, 1500);
+                        }
                     });
                 }, 300);
                 
@@ -280,6 +304,205 @@ function initExpandSectionButtons() {
 }
 
 /**
+ * Create missing portfolio items for each section
+ */
+function createMissingPortfolioItems() {
+    const sections = document.querySelectorAll('.portfolio-section');
+    
+    sections.forEach(section => {
+        const category = section.getAttribute('data-category');
+        const gallery = section.querySelector('.portfolio-gallery');
+        const existingItems = gallery.querySelectorAll('.portfolio-item-behance');
+        const totalImages = getTotalImagesForCategory(category);
+        
+        // If we have fewer items than total images, create the missing ones
+        if (existingItems.length < totalImages) {
+            const imagesToAdd = totalImages - existingItems.length;
+            const images = getImagesForCategory(category);
+            
+            // Create the missing items
+            for (let i = existingItems.length; i < totalImages; i++) {
+                const itemElement = createPortfolioItem(category, i, images[i]);
+                gallery.appendChild(itemElement);
+            }
+            
+            console.log(`Added ${imagesToAdd} items to category ${category}`);
+        }
+    });
+}
+
+/**
+ * Create a portfolio item element
+ * @param {string} category - The category identifier
+ * @param {number} index - The image index
+ * @param {string} imageName - The image filename
+ * @returns {HTMLElement} - The created portfolio item element
+ */
+function createPortfolioItem(category, index, imageName) {
+    const item = document.createElement('div');
+    item.className = 'portfolio-item-behance';
+    item.setAttribute('data-folder', category);
+    item.setAttribute('data-index', index);
+    
+    const imageWrapper = document.createElement('div');
+    imageWrapper.className = 'image-wrapper';
+    
+    const img = document.createElement('img');
+    img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E";
+    img.setAttribute('data-src', `assets/images/portofolio/${category}/${imageName}`);
+    img.alt = `تصميم ${getCategoryName(category)}`;
+    img.className = 'lazy-image';
+    img.width = 600;
+    img.height = 600;
+    
+    const loader = document.createElement('div');
+    loader.className = 'image-loader';
+    
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    
+    loader.appendChild(spinner);
+    imageWrapper.appendChild(img);
+    imageWrapper.appendChild(loader);
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'portfolio-overlay-behance';
+    
+    const title = document.createElement('h3');
+    title.textContent = `تصميم ${getCategoryName(category)}`;
+    
+    overlay.appendChild(title);
+    
+    item.appendChild(imageWrapper);
+    item.appendChild(overlay);
+    
+    // Add click event to open portfolio modal
+    item.addEventListener('click', function() {
+        const folder = this.getAttribute('data-folder');
+        const index = parseInt(this.getAttribute('data-index'));
+        const title = this.querySelector('h3').textContent;
+        openPortfolioModal(folder, index, title, '');
+    });
+    
+    return item;
+}
+
+/**
+ * Get the category name in Arabic
+ * @param {string} category - The category identifier
+ * @returns {string} - The category name in Arabic
+ */
+function getCategoryName(category) {
+    switch (category) {
+        case 's1': return 'منتج';
+        case 's2': return 'أعمال';
+        case 's3': return 'صحة';
+        case 's4': return 'جمال';
+        case 's5': return 'أمان';
+        case 's7': return 'سفر';
+        case 's8': return 'جمال';
+        default: return '';
+    }
+}
+
+/**
+ * Get images for a specific category
+ * @param {string} category - The category identifier
+ * @returns {Array} - Array of image filenames
+ */
+function getImagesForCategory(category) {
+    switch (category) {
+        case 's1':
+            return [
+                'WhatsApp Image 2025-05-25 at 4.42.07 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.42.07 PM (1).jpeg',
+                'WhatsApp Image 2025-05-25 at 4.42.07 PM (2).jpeg',
+                'WhatsApp Image 2025-05-25 at 4.42.08 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.42.08 PM (1).jpeg'
+            ];
+        case 's2':
+            return [
+                'WhatsApp Image 2025-05-25 at 4.43.30 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.43.31 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.43.31 PM (1).jpeg',
+                'WhatsApp Image 2025-05-25 at 4.43.31 PM (2).jpeg',
+                'WhatsApp Image 2025-05-25 at 4.43.32 PM.jpeg'
+            ];
+        case 's3':
+            return [
+                'WhatsApp Image 2025-05-25 at 4.45.02 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.45.03 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.45.10 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.45.10 PM (1).jpeg',
+                'WhatsApp Image 2025-05-25 at 4.45.11 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.45.11 PM (1).jpeg'
+            ];
+        case 's4':
+            return [
+                'WhatsApp Image 2025-05-25 at 4.47.00 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.47.00 PM (1).jpeg',
+                'WhatsApp Image 2025-05-25 at 4.47.02 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.47.06 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.47.07 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.47.07 PM (1).jpeg'
+            ];
+        case 's5':
+            return [
+                'WhatsApp Image 2025-05-25 at 4.55.34 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.55.34 PM (1).jpeg',
+                'WhatsApp Image 2025-05-25 at 4.55.34 PM (2).jpeg',
+                'WhatsApp Image 2025-05-25 at 4.55.35 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 4.55.35 PM (1).jpeg'
+            ];
+        case 's7':
+            return [
+                'WhatsApp Image 2025-05-25 at 5.02.29 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 5.03.33 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 5.03.33 PM (1).jpeg',
+                'WhatsApp Image 2025-05-25 at 5.03.33 PM (2).jpeg',
+                'WhatsApp Image 2025-05-25 at 5.03.33 PM (3).jpeg'
+            ];
+        case 's8':
+            return [
+                'WhatsApp Image 2025-05-25 at 5.04.23 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 5.04.25 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 5.04.26 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 5.04.27 PM.jpeg',
+                'WhatsApp Image 2025-05-25 at 5.04.27 PM (1).jpeg'
+            ];
+        default:
+            return [];
+    }
+}
+
+/**
+ * Get the total number of images for a category
+ * @param {string} category - The category identifier
+ * @returns {number} - The total number of images
+ */
+function getTotalImagesForCategory(category) {
+    // This is based on the data we have in loadFolderImages function
+    switch (category) {
+        case 's1':
+            return 5; // 5 images in s1 folder
+        case 's2':
+            return 5; // 5 images in s2 folder
+        case 's3':
+            return 6; // 6 images in s3 folder
+        case 's4':
+            return 6; // 6 images in s4 folder
+        case 's5':
+            return 5; // 5 images in s5 folder
+        case 's7':
+            return 5; // 5 images in s7 folder
+        case 's8':
+            return 5; // 5 images in s8 folder
+        default:
+            return 0;
+    }
+}
+
+/**
  * Reset all expand section buttons to initial state
  */
 function resetExpandSectionButtons() {
@@ -294,17 +517,23 @@ function resetExpandSectionButtons() {
  * @param {HTMLElement} section - The section to reset
  */
 function resetSectionState(section) {
+    const category = section.getAttribute('data-category');
     const items = Array.from(section.querySelectorAll('.portfolio-item-behance'));
     const expandBtn = section.querySelector('.expand-section-btn');
+    const totalImages = getTotalImagesForCategory(category);
     
     if (expandBtn) {
         expandBtn.textContent = 'عرض المزيد من الأعمال';
         expandBtn.classList.remove('expanded');
         
-        if (items.length <= 3) {
+        if (totalImages <= 3) {
             expandBtn.classList.add('hidden');
+            expandBtn.style.display = 'none';
         } else {
             expandBtn.classList.remove('hidden');
+            expandBtn.style.display = 'block';
+            expandBtn.style.visibility = 'visible';
+            expandBtn.style.opacity = '1';
         }
     }
     
@@ -316,6 +545,17 @@ function resetSectionState(section) {
             item.style.display = 'none';
         }
     });
+    
+    // Make sure we have all the items we need
+    const gallery = section.querySelector('.portfolio-gallery');
+    if (items.length < totalImages) {
+        const images = getImagesForCategory(category);
+        for (let i = items.length; i < totalImages; i++) {
+            const itemElement = createPortfolioItem(category, i, images[i]);
+            itemElement.style.display = 'none'; // Initially hidden
+            gallery.appendChild(itemElement);
+        }
+    }
 }
 
 /**
@@ -539,4 +779,31 @@ function initCategoriesToggle() {
             }
         });
     }
+}
+
+/**
+ * Check button visibility and log status
+ */
+function checkButtonVisibility() {
+    const buttons = document.querySelectorAll('.expand-section-btn');
+    
+    buttons.forEach(button => {
+        const category = button.getAttribute('data-category');
+        const isHidden = button.classList.contains('hidden');
+        const computedStyle = window.getComputedStyle(button);
+        const isDisplayNone = computedStyle.display === 'none';
+        
+        console.log(`Button for ${category}: hidden class=${isHidden}, display=${computedStyle.display}, visible=${!isDisplayNone}`);
+        
+        // Force show if should be visible
+        const totalImages = getTotalImagesForCategory(category);
+        if (totalImages > 3 && (isHidden || isDisplayNone)) {
+            console.log(`Forcing visibility for ${category} button`);
+            button.classList.remove('hidden');
+            button.style.display = 'block';
+            button.style.visibility = 'visible';
+            button.style.opacity = '1';
+            button.style.zIndex = '10';
+        }
+    });
 } 

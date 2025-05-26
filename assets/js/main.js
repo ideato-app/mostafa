@@ -2,12 +2,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize AOS with a small delay for better performance
     setTimeout(() => {
-        AOS.init({
-            duration: 800,
-            easing: 'ease-in-out',
-            once: true,
-            mirror: false,
-            offset: 50,
+AOS.init({
+    duration: 800,
+    easing: 'ease-in-out',
+    once: true,
+    mirror: false,
+    offset: 50,
             delay: 100,
             disable: window.innerWidth < 768 && 'mobile' // Disable on mobile for better performance
         });
@@ -24,7 +24,7 @@ function initThemeToggle() {
     
     // Theme colors for browser UI
     const lightThemeColor = '#1e3a8a'; // Deep Blue for light theme
-    const darkThemeColor = '#3b82f6';  // Bright Blue for dark theme
+    const darkThemeColor = '#007EA7';  // Bright blue for dark theme from new palette
     
     // Set initial theme based on localStorage or system preference
     if (currentTheme) {
@@ -57,6 +57,11 @@ function initThemeToggle() {
             // Remove transition class after animation completes
             setTimeout(() => {
                 htmlElement.classList.remove('theme-transition');
+                
+                // Refresh AOS animations when theme changes
+                if (typeof AOS !== 'undefined') {
+                    AOS.refresh();
+                }
             }, 300);
         });
     }
@@ -106,9 +111,9 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         if (target) {
             // Use requestAnimationFrame for smoother scrolling
             requestAnimationFrame(() => {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
                 });
             });
         }

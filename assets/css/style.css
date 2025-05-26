@@ -19,19 +19,23 @@
 
 /* Dark Theme Variables - Blue Context */
 [data-theme="dark"] {
-    --primary-color: #3b82f6; /* Bright Blue */
-    --secondary-color: #60a5fa; /* Light Blue */
-    --accent-color: #93c5fd; /* Very Light Blue */
-    --text-color: #e0f2fe;
-    --light-bg: #0f172a; /* Dark Blue-Black */
-    --white: #1e293b; /* Dark Blue-Gray */
-    --card-bg: #1e293b;
-    --shadow-color: rgba(37, 99, 235, 0.3);
-    --footer-text: #e0f2fe;
-    --gradient-start: #0f172a;
-    --gradient-end: #1e3a8a;
-    --skill-bg: rgba(59, 130, 246, 0.2);
-    --border-color: rgba(59, 130, 246, 0.2);
+    --primary-color: #007EA7; /* Bright blue for buttons, call-to-action (CTA), and highlights */
+    --secondary-color: #00A8E8; /* Accent color for hovers, icons, or secondary buttons */
+    --accent-color: #00A8E8; /* Accent color for hovers, icons, or secondary buttons */
+    --text-color: #FFFFFF; /* Main text color */
+    --light-bg: #00171F; /* Very dark blue for main backgrounds */
+    --white: #003459; /* Navy blue for cards, sections, and secondary areas */
+    --card-bg: #003459; /* Navy blue for cards, sections, and secondary areas */
+    --shadow-color: rgba(0, 168, 232, 0.3); /* Based on accent color */
+    --footer-text: #FFFFFF; /* Main text color */
+    --gradient-start: #00171F; /* Very dark blue for main backgrounds */
+    --gradient-end: #003459; /* Navy blue for cards, sections, and secondary areas */
+    --skill-bg: rgba(0, 126, 167, 0.2); /* Based on primary color */
+    --border-color: rgba(0, 168, 232, 0.2); /* Based on accent color */
+    --text-secondary: rgba(255, 255, 255, 0.75); /* Secondary text with slight opacity */
+    --button-glow: 0 0 10px rgba(0, 168, 232, 0.4); /* Soft glow for buttons */
+    --card-hover-shadow: 0 8px 25px rgba(0, 168, 232, 0.25); /* Glow effect for card hover */
+    --transition-smooth: all 0.2s ease-in-out; /* Smooth transitions */
 }
 
 /* Theme transition animation */
@@ -321,6 +325,33 @@ body {
 .cta-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px var(--shadow-color);
+}
+
+/* Dark theme specific button styles */
+[data-theme="dark"] .cta-button {
+    box-shadow: var(--button-glow);
+    border-radius: 6px;
+}
+
+[data-theme="dark"] .cta-button:hover {
+    box-shadow: 0 0 15px rgba(0, 168, 232, 0.6);
+    transform: translateY(-3px);
+}
+
+/* Dark theme card hover effects */
+[data-theme="dark"] .about-content:hover,
+[data-theme="dark"] .skill-card:hover,
+[data-theme="dark"] .portfolio-item-behance:hover {
+    box-shadow: var(--card-hover-shadow);
+    border-color: rgba(0, 168, 232, 0.3);
+}
+
+/* Dark theme specific text styles */
+[data-theme="dark"] .portfolio-description,
+[data-theme="dark"] .about-specialty,
+[data-theme="dark"] .about-description p,
+[data-theme="dark"] .portfolio-section-header p {
+    color: var(--text-secondary);
 }
 
 /* Side Buttons */
@@ -1964,6 +1995,7 @@ img {
     display: flex;
     justify-content: center;
     margin: 2rem 0;
+    width: 100%;
 }
 
 .expand-section-btn {
@@ -1980,6 +2012,8 @@ img {
     font-family: 'Cairo', sans-serif;
     position: relative;
     overflow: hidden;
+    z-index: 10;
+    display: block !important;
 }
 
 .expand-section-btn:hover {
@@ -2004,7 +2038,8 @@ img {
 }
 
 .expand-section-btn.hidden {
-    display: none;
+    display: none !important;
+    visibility: hidden;
 }
 
 .expand-section-btn.expanded:after {
@@ -2013,6 +2048,15 @@ img {
     font-weight: 900;
     margin-right: 10px;
     display: inline-block;
+}
+
+/* Add responsive styles for the expand button */
+@media (max-width: 768px) {
+    .expand-section-btn {
+        width: 90%;
+        padding: 0.7rem 1.5rem;
+        font-size: 1rem;
+    }
 }
 
 /* Categories Toggle Button */
@@ -2065,4 +2109,198 @@ img {
         min-width: 100px;
         text-align: center;
     }
+}
+
+/* Dark theme background and section styles */
+[data-theme="dark"] .hero,
+[data-theme="dark"] .skills,
+[data-theme="dark"] .contact {
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+}
+
+[data-theme="dark"] .footer {
+    background: linear-gradient(135deg, #003459 0%, #00171F 100%);
+}
+
+[data-theme="dark"] .about-approach {
+    background-color: rgba(0, 23, 31, 0.5);
+    border-left: 3px solid var(--primary-color);
+}
+
+/* Dark theme card styles */
+[data-theme="dark"] .about-content,
+[data-theme="dark"] .skill-card,
+[data-theme="dark"] .portfolio-modal-content {
+    border: 1px solid rgba(0, 126, 167, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: var(--transition-smooth);
+}
+
+/* Dark theme header and navigation */
+[data-theme="dark"] .header {
+    background-color: rgba(0, 23, 31, 0.95);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .nav-links a {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .nav-links a:hover,
+[data-theme="dark"] .nav-links a.active {
+    color: var(--secondary-color);
+}
+
+[data-theme="dark"] .nav-links a:after {
+    background-color: var(--secondary-color);
+}
+
+/* Dark theme portfolio items */
+[data-theme="dark"] .portfolio-overlay-behance {
+    background: linear-gradient(to top, rgba(0, 23, 31, 0.95) 0%, transparent 100%);
+}
+
+[data-theme="dark"] .portfolio-category {
+    background-color: rgba(0, 52, 89, 0.7);
+}
+
+[data-theme="dark"] .portfolio-category:hover,
+[data-theme="dark"] .portfolio-category.active {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(0, 168, 232, 0.4);
+}
+
+/* Dark theme toggle button */
+[data-theme="dark"] .theme-toggle {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(0, 168, 232, 0.4);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Dark theme expand section button */
+[data-theme="dark"] .expand-section-btn {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    box-shadow: var(--button-glow);
+}
+
+[data-theme="dark"] .expand-section-btn:hover {
+    box-shadow: 0 0 15px rgba(0, 168, 232, 0.6);
+}
+
+/* Dark theme modal and lightbox */
+[data-theme="dark"] .portfolio-modal {
+    background-color: rgba(0, 23, 31, 0.95);
+}
+
+[data-theme="dark"] .lightbox {
+    background-color: rgba(0, 23, 31, 0.98);
+}
+
+[data-theme="dark"] .lightbox-prev,
+[data-theme="dark"] .lightbox-next {
+    background-color: rgba(0, 52, 89, 0.7);
+}
+
+[data-theme="dark"] .lightbox-prev:hover,
+[data-theme="dark"] .lightbox-next:hover {
+    background-color: var(--primary-color);
+}
+
+/* Dark theme social icons and contact elements */
+[data-theme="dark"] .social-contact a {
+    background-color: rgba(0, 52, 89, 0.7);
+    color: var(--text-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .social-contact a:hover {
+    background-color: var(--primary-color);
+    box-shadow: var(--button-glow);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .email-button {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    box-shadow: var(--button-glow);
+}
+
+[data-theme="dark"] .email-button:hover {
+    box-shadow: 0 0 15px rgba(0, 168, 232, 0.6);
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+}
+
+/* Dark theme mobile navigation */
+[data-theme="dark"] .nav-links {
+    background-color: var(--light-bg);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .mobile-toggle {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .mobile-toggle:hover {
+    color: var(--secondary-color);
+}
+
+[data-theme="dark"] .nav-overlay {
+    background-color: rgba(0, 23, 31, 0.8);
+}
+
+/* Dark theme headings and text */
+[data-theme="dark"] h1, 
+[data-theme="dark"] h2, 
+[data-theme="dark"] h3, 
+[data-theme="dark"] h4 {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .about h2:after,
+[data-theme="dark"] .portfolio-section-header h2::before {
+    background-color: var(--primary-color);
+}
+
+/* Dark theme logo */
+[data-theme="dark"] .logo a {
+    color: var(--secondary-color);
+    text-shadow: 0 0 5px rgba(0, 168, 232, 0.3);
+}
+
+[data-theme="dark"] .logo a:hover {
+    color: var(--text-color);
+}
+
+/* Dark theme skill progress */
+[data-theme="dark"] .skill-level {
+    background-color: rgba(0, 23, 31, 0.5);
+}
+
+[data-theme="dark"] .skill-progress {
+    background: linear-gradient(to right, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+/* Dark theme side buttons */
+[data-theme="dark"] .side-button {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    box-shadow: var(--button-glow);
+}
+
+[data-theme="dark"] .side-button:hover {
+    box-shadow: 0 0 15px rgba(0, 168, 232, 0.6);
+}
+
+[data-theme="dark"] .side-button.whatsapp {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+}
+
+/* Dark theme categories toggle button */
+[data-theme="dark"] .categories-toggle-btn {
+    background-color: var(--primary-color);
+}
+
+[data-theme="dark"] .categories-toggle-btn:hover {
+    background-color: var(--secondary-color);
 } 
